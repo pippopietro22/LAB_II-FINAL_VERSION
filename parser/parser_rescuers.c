@@ -1,3 +1,7 @@
+#include<stdio.h>
+#include<stdlib.h>
+#include<string.h>
+
 #include "../Utils/Macro.h"
 #include "../Utils/Strutture.h"
 

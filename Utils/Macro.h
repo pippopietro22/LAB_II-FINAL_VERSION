@@ -1,5 +1,5 @@
 #define DEBUG
-#undef DEBUG
+//#undef DEBUG
 
 //ERRORE GENERICO
 #define ERROR(e) (perror(e), exit(EXIT_FAILURE))
@@ -34,5 +34,6 @@
 #define SCALL_ERROR -1
 #define SCALL(ret,call,e) do { if((ret = call) == SCALL_ERROR){ ERROR(e); } } while(0)
 #define SNCALL(ret,call,e) do { if((ret = call) == NULL) { ERROR(e); } } while(0)
+#define SLEEPCALL(ret,call,e) do { if((ret = call) != 0){ ERROR(e); } } while(0)
 #define SCALLREAD(ret,loop_cond_op,read_loop_op,e) do { while ((ret = loop_condition_op) > 0) { read_loop_op } if(rescuerTwin == SCALL_ERROR) { ERROR(e); } } while(0)
 #define PARENT_OR_CHILD(pid,f_parent,f_child) do { if(pid == 0) { f_child; } else { f_parent; } } while(0)

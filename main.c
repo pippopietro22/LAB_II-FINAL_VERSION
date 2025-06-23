@@ -2,18 +2,11 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
-#include<time.h>
 #include<sys/mman.h>
-#include<sys/stat.h>
-#include<sys/types.h>
 #include<sys/wait.h>
-#include<unistd.h>
-#include<fcntl.h>
 #include<mqueue.h>
-#include<errno.h>
-#include<math.h>
-#include <threads.h>
-#include <stdatomic.h>
+#include<threads.h>
+#include<stdatomic.h>
 
 #include "Utils/Macro.h"
 #include "Utils/Strutture.h"
@@ -50,7 +43,7 @@ int main(){
 
     //SHARED MEMORY: condivisione nome message_queu al client
     int fd,ret; //fd è l'indice della shared_memory
-                //ret è il valore di ritorno di ftruncare()
+                //ret è il valore di ritorno di ftruncare() e altre chiamate
     void *ptr;  //ptr è il valore di ritorno di mmap
 
     SCALL(fd,shm_open(SHM_NAME, O_CREAT | O_RDWR, 0666),"Errore durante la creazione della memoria condivisa.\n");    
@@ -164,7 +157,7 @@ int main(){
         #ifdef DEBUG
             printf("THRD ATTIVI: %d\n",atomic_load(&thrd_attivi));
             fflush(stdout);
-            sleep(2);
+            SLEEPCALL(ret,sleep(2),"Errore durante sleep() da main.\n");
         #endif
     }
 

@@ -1,19 +1,9 @@
-#define _GNU_SOURCE
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
-#include<time.h>
-#include<sys/mman.h>
-#include<sys/stat.h>
-#include<sys/types.h>
-#include<sys/wait.h>
-#include<unistd.h>
-#include<fcntl.h>
-#include<mqueue.h>
-#include<errno.h>
-#include<math.h>
-#include <threads.h>
-#include <stdatomic.h>
+#include<threads.h>
+#include<stdatomic.h>
+
 
 #include "../Utils/Macro.h"
 #include "../Utils/Strutture.h"
