@@ -90,8 +90,10 @@ void rimuovi_timeout(lista_t *list, mtx_t *log_mtx, FILE*flog){
                             time_now,current->emrg->id, current->emrg->type->emergency_desc),flog, "Errore durante scrittura file LOG da rimuovi_timeout().\n");
         mtx_unlock(log_mtx);
 
-        printf("EMERGENZA %d_%s TIMEOUT, rimasta in attesa per troppo tempo\n", current->emrg->id, current->emrg->type->emergency_desc);
-        fflush(stdout);
+        #ifdef DEBUG
+            printf("EMERGENZA %d_%s TIMEOUT, rimasta in attesa per troppo tempo\n", current->emrg->id, current->emrg->type->emergency_desc);
+            fflush(stdout);
+        #endif
 
         nodo_t *da_cancellare = current;
         current = current->prev;

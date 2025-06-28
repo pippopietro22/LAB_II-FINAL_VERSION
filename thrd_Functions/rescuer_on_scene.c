@@ -42,13 +42,11 @@ int rescuer_on_scene(void *data){
         #endif
 
         //Documento sul file log
-        if(atomic_load(&keep_running)){
-            mtx_lock(&log_mtx);
-                tempo_corrente(time_now);
-                FPRINT(fprintf(args->flog,"[%s] [%s_%d] [RESCUER_STATUS] <Soccorritore sta tornando alla base>\n",time_now, \
-                                args->digTwin->rescuer->rescuer_type_name, args->digTwin->id), args->flog,"Erroredurante scrittura file LOG da rescuer_return().\n");
-            mtx_unlock(&log_mtx);
-        }
+        mtx_lock(&log_mtx);
+            tempo_corrente(time_now);
+            FPRINT(fprintf(args->flog,"[%s] [%s_%d] [RESCUER_STATUS] <Soccorritore sta tornando alla base>\n",time_now, \
+                            args->digTwin->rescuer->rescuer_type_name, args->digTwin->id), args->flog,"Erroredurante scrittura file LOG da rescuer_return().\n");
+        mtx_unlock(&log_mtx);
     mtx_unlock(&rescuer_mtx);
 
     thrd_t soccorso;

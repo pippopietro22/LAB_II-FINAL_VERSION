@@ -23,6 +23,7 @@ cnd_t lista_cnd;    //cnd per attesa lista emergenze
 atomic_int keep_running = 1;
 atomic_int id_emrg = 1;
 atomic_int thrd_attivi = 0;
+atomic_int emrg_gestite = 0;
 
 //PROTOTIPI FUNZIONI THRD
 int thrd_insert(void *data);
@@ -103,8 +104,8 @@ int main(){
         thrd_create(&operatori[i],thrd_operatori,args_op);
     }
 
-    printf("INSERISCI UN'EMERGENZA (./client [EMERGENZA] [COORD X] [COORD Y] [DELAY (in sec)]).\n");
-    printf("INSERISCI UN FILE (./client -f [file_name]).\n");
+    printf("INSERISCI UN'EMERGENZA (./client EMERGENZA X Y DELAY(in sec)).\n");
+    printf("INSERISCI UN FILE (./client -f file_name).\n");
     printf("TERMINA L'ESECUZIONE (./client exit).\n");
     fflush(stdout);
 

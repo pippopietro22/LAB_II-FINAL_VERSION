@@ -10,7 +10,9 @@ extern lista_t *lista_emergenze;
 extern int soccorritori_liberi[RESCUER_TYPES];
 
 extern mtx_t log_mtx;
+
 extern atomic_int id_emrg;
+extern atomic_int emrg_gestite;
 
 void emergenza_errata(FILE *fd, char *msg){
     char time_now[BUFF];
@@ -156,7 +158,7 @@ void controllo_situazione(rescuer_type_t *tipiSoccorritori){
         if(soccorritori_liberi[i] < tipiSoccorritori[i].quantity) socc_pronti = 0;
     }
 
-    if(!numero_emrgs && socc_pronti){
+    if(!numero_emrgs && socc_pronti && !atomic_load(&emrg_gestite)){
         printf("TUTTE LE EMERGENZE COMPLETATE\n");
         printf("TUTTI I SOCCORRITORI LIBERI\n");
         fflush(stdout);

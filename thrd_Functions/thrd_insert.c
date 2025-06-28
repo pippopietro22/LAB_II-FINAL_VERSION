@@ -60,17 +60,9 @@ int thrd_insert(void *data){
     int delay = valid->timestamp - now;
     
     //Se il delay è maggiore di 0 si esegue un'attesa
-    if(delay > 0){
+    if(delay > 0 && atomic_load(&keep_running)){
         struct timespec attesa = {.tv_sec = delay, .tv_nsec = 0};
         thrd_sleep(&attesa, NULL);
-    }
-
-    //INTERRUZIONE PROGRAMMA
-    if(!atomic_load(&keep_running)){
-        destroy_emrg_validata(valid);
-        free(args);
-        atomic_fetch_sub(&thrd_attivi,1);
-        return thrd_success;
     }
 
     //Dopo l'eventuale attesa, si inserisce l'emergenza validata nella lista delle emergenze

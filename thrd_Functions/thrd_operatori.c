@@ -19,7 +19,7 @@ extern cnd_t lista_cnd;    //cnd per attesa lista emergenze
 
 extern atomic_int keep_running;
 extern atomic_int id_emrg;
-extern atomic_int thrd_attivi;
+extern atomic_int emrg_gestite;
 
 
 int thrd_operatori(void *data){
@@ -59,8 +59,12 @@ int thrd_operatori(void *data){
             emergency_t *newEmergency = estrai_nodo(lista_emergenze);
         mtx_unlock(&lista_mtx);
 
+
         //In caso il nodo, per un qualsiasi malfunzionamento, mi restituisse un puntatore a NULL, salto l'iterazione
         if (newEmergency == NULL) continue;
+
+        //Segno che il thrd sta gestendo un'emergenza
+        atomic_fetch_add(&emrg_gestite,1);
 
         //Salvo nella struttura locale tutti i dati riguardanti l'emergenza e dealloco la struttura dall'heap
         current = *newEmergency;
@@ -71,7 +75,7 @@ int thrd_operatori(void *data){
         //CONTROLLO SE I SOCCORSI POSSONO ARRIVARE IN TEMPO
         int t_attesa = tempo_arrivo_soccorsi(&current);
         int t_rimanente = tempo_rimanente(&current);
-        if(t_rimanente <= 0 || t_rimanente < t_attesa){
+        if(t_rimanente < t_attesa){
             #ifdef DEBUG
                 printf("EMERGENZA %d_%s TIMEOUT: Impossibile raggiungere il luogo dell'emergenza in tempo.\n",current.id, current.type->emergency_desc);
                 fflush(stdout);
@@ -82,6 +86,10 @@ int thrd_operatori(void *data){
                 FPRINT(fprintf(args->flog,"[%s] [%d_%s] [EMERGENCY_STATUS] <TIMEOUT: tempo insufficiente per raggiungere il luogo dell'emergenza>\n",time_now, \
                                 current.id, current.type->emergency_desc),args->flog,"Errore durante scrittura su file LOG.\n");
             mtx_unlock(&log_mtx);
+
+            //Indico che viene gestita un'emergenza in meno
+            atomic_fetch_sub(&emrg_gestite,1);
+
             continue;
         }
 
@@ -132,7 +140,7 @@ int thrd_operatori(void *data){
                     //Documento sul file LOG
                     mtx_lock(&log_mtx);
                         tempo_corrente(time_now);
-                        FPRINT(fprintf(args->flog,"[%s] [%s_%d] [RESCUER_STATUS] <Soccorritore procede verso l'emergenza.>\n",time_now, \
+                        FPRINT(fprintf(args->flog,"[%s] [%s_%d] [RESCUER_STATUS] <Soccorritore procede verso l'emergenza>\n",time_now, \
                                         current.rescuers_dt[i][idx_res]->rescuer->rescuer_type_name, current.rescuers_dt[i][idx_res]->id),args->flog, \
                                         "Errore durante scrittura file LOG da thrd_operatori().\n");
                     mtx_unlock(&log_mtx);
@@ -143,6 +151,48 @@ int thrd_operatori(void *data){
                 }
             mtx_unlock(&rescuer_mtx);
         }
+
+
+        //CONTROLLO SE È RIMASTO ABBASTANZA TEMPO DOPO AVER RECUPERATO LE RISORSE
+        t_rimanente = tempo_rimanente(&current);
+        if(t_rimanente < t_attesa || !atomic_load(&keep_running)){
+            for(int i = 0; i < RESCUER_TYPES; i++){
+                if(current.type->rescuers[i].type == NULL) continue;
+
+                int res_count = current.type->rescuers[i].required_count;
+                
+                mtx_lock(&rescuer_mtx);
+                    for(int j = 0; j < res_count; j++){
+                        current.rescuers_dt[i][j]->status = IDLE;
+
+                        mtx_lock(&log_mtx);
+                            tempo_corrente(time_now);
+                            FPRINT(fprintf(args->flog,"[%s] [%s_%d] [RESCUER_STATUS] <Soccorritore abbandona l'emergenza>\n",time_now, \
+                                        current.rescuers_dt[i][j]->rescuer->rescuer_type_name, current.rescuers_dt[i][j]->id),args->flog, \
+                                        "Errore durante scrittura file LOG da thrd_operatori().\n");
+                        mtx_unlock(&log_mtx);
+                    }
+
+                    soccorritori_liberi[i] += res_count;
+                mtx_unlock(&rescuer_mtx);
+
+                free(current.rescuers_dt[i]);
+            }
+
+            #ifdef DEBUG
+                if(atomic_load(&keep_running)){
+                    printf("THRD %d EMERGENZA %d_%s TIMEOUT, IMPIEGATO TROPPO TEMPO PER ACQUISIRE RISOSRE.\n",args->id, current.id, current.type->emergency_desc);
+                    fflush(stdout);
+                }
+            #endif
+
+            //Indico che viene gestita un'emergenza in meno
+            atomic_fetch_sub(&emrg_gestite,1);
+
+            continue;
+        }
+
+
 
         #ifdef DEBUG
             printf("THRD %d EMERGENZA %d_%s RISORSE OTTENUTE ATTENDO ARRIVO\n",args->id, current.id, current.type->emergency_desc);
@@ -233,7 +283,14 @@ int thrd_operatori(void *data){
                             args->flog,"Errore scrittura file LOG da thrd_operatori().\n");
         mtx_unlock(&log_mtx);
 
+        //Indico che viene gestita un'emergenza in meno
+        atomic_fetch_sub(&emrg_gestite,1);
     }
+
+    #ifdef DEBUG
+        printf("THRD %d USCITO\n",args->id);
+        fflush(stdout);
+    #endif
 
     free(args);
 

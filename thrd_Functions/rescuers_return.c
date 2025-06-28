@@ -17,8 +17,8 @@ extern cnd_t rescuer_cnd;  //cnd per attesa ripristino risorse
 extern cnd_t lista_cnd;    //cnd per attesa lista emergenze
 
 extern atomic_int keep_running;
-extern atomic_int id_emrg;
 extern atomic_int thrd_attivi;
+extern atomic_int emrg_gestite;
 
 
 //Funzione di gestione individuale dei soccorritori
@@ -52,13 +52,11 @@ int rescuers_return(void *data){
         #endif
 
         //Documento sul file log
-        if(atomic_load(&keep_running)){
-            mtx_lock(&log_mtx);
-                tempo_corrente(time_now);
-                FPRINT(fprintf(args->flog,"[%s] [%s_%d] [RESCUER_STATUS] <Soccorritore tornato alla base>\n",time_now, \
-                                args->digTwin->rescuer->rescuer_type_name,args->digTwin->id), args->flog,"Erroredurante scrittura file LOG da rescuer_return().\n");
-            mtx_unlock(&log_mtx);
-        }
+        mtx_lock(&log_mtx);
+            tempo_corrente(time_now);
+            FPRINT(fprintf(args->flog,"[%s] [%s_%d] [RESCUER_STATUS] <Soccorritore tornato alla base>\n",time_now, \
+                            args->digTwin->rescuer->rescuer_type_name,args->digTwin->id), args->flog,"Erroredurante scrittura file LOG da rescuer_return().\n");
+        mtx_unlock(&log_mtx);
 
         #ifdef DEBUG
             printf("SOCCORRITORI: ");
@@ -69,6 +67,11 @@ int rescuers_return(void *data){
             fflush(stdout);
         #endif
     mtx_unlock(&rescuer_mtx);
+
+    #ifdef DEBUG
+        printf("thrd con in carico un'emergenza: %d\n",atomic_load(&emrg_gestite));
+        fflush(stdout);
+    #endif
 
     //Sveglio tutti i thrd in attesa di risorse
     cnd_broadcast(&rescuer_cnd);
