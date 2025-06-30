@@ -215,6 +215,9 @@ int thrd_operatori(void *data){
 
             //Questo thrd rilascia la sua emergenza e lo segnala
             atomic_fetch_sub(&emrg_gestite,1);
+
+            controllo_situazione(args->tipiSoccorritori);
+
             continue;
         }
 
