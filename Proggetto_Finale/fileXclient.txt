@@ -1,7 +1,0 @@
-Incendio 100 230 3
-Avvistamento_Pirati 399 200 9
-Furto 123 345 6
-Incendio 230 234 7
-Sparatoria 234 233 1
-Incendio 100 230 3
-Allagamento 12 234 2
