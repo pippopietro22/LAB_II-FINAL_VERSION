@@ -101,11 +101,9 @@ int thrd_operatori(void *data){
             continue;
         }
 
-        //Messaggio DEBUG
-        #ifdef DEBUG
-            printf("THRD %d EMERGENZA %d_%s PRESA IN CARICO\n", args->id, current.id, current.type->emergency_desc);
-            fflush(stdout);
-        #endif
+        //Messaggio Presa in carico
+        printf("THRD %d EMERGENZA %d_%s PRESA IN CARICO\n", args->id, current.id, current.type->emergency_desc);
+        fflush(stdout);
 
         //Documento presa in carico dell'emergenza
         mtx_lock(&log_mtx);
@@ -198,22 +196,26 @@ int thrd_operatori(void *data){
                     soccorritori_liberi[i] += res_count;
                 mtx_unlock(&rescuer_mtx);
 
+                cnd_broadcast(&rescuer_cnd);
+
                 //Si dealloca lo spazio utilizzato dall'array di gemelli digitali
                 free(current.rescuers_dt[i]);
             }
 
-            //Messaggio di DEBUG
-            #ifdef DEBUG
-                if(atomic_load(&keep_running)){
-                    printf("THRD %d EMERGENZA %d_%s TIMEOUT, IMPIEGATO TROPPO TEMPO PER ACQUISIRE RISOSRE.\n",args->id, current.id, current.type->emergency_desc);
-                    fflush(stdout);
-                }
-            #endif
+
+            if(atomic_load(&keep_running)){
+                //Messaggio di DEBUG
+                #ifdef DEBUG
+                        printf("THRD %d \n",args->id);
+                        fflush(stdout);
+                #endif
+                printf("EMERGENZA %d_%s TIMEOUT, IMPIEGATO TROPPO TEMPO PER ACQUISIRE RISOSRE.\n", current.id, current.type->emergency_desc);
+                fflush(stdout);
+            }
 
             //Questo thrd rilascia la sua emergenza e lo segnala
             atomic_fetch_sub(&emrg_gestite,1);
-
-            break;
+            continue;
         }
 
 

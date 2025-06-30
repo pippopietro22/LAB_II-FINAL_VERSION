@@ -104,12 +104,18 @@ void add_emrg(lista_t *list, emergency_t *emrg) {
 
 //Funzione che rimuove node (emergenze) che sono arrivati in timeout: hanno aspettato troppo nella lista e il tempo è scaduto
 void rimuovi_timeout(lista_t *list, mtx_t *log_mtx, FILE*flog){
-    if(list->dim_lista == 0) return;    //Nessun elemento nella lista
+    if(list == NULL || list->dim_lista == 0) return;    //Nessun elemento nella lista
     
     nodo_t *current = list->tail;   //Nodo ausigliario per scorrere la lista
 
     //Finche current punta ad un nodo e l'emergenza corrente ha esaurito il tempo, si continua a rimuovere nodi
-    while(current != NULL && tempo_rimanente(current->emrg) <= 0){
+    while(current != NULL){
+        //Se il nodo analizzato contiene un emergenza ancora valida, si salta quest'iterazione
+        if(tempo_rimanente(current->emrg) > 0){ 
+            current = current->prev;
+            continue;
+        }
+
         //Variabile per scrivere il tempo corrente su logFile.txt
         char time_now[BUFF];
 
@@ -120,11 +126,10 @@ void rimuovi_timeout(lista_t *list, mtx_t *log_mtx, FILE*flog){
                             time_now,current->emrg->id, current->emrg->type->emergency_desc),flog, "Errore durante scrittura file LOG da rimuovi_timeout().\n");
         mtx_unlock(log_mtx);
 
-        //Messaggio di DEBUG da stampare a schermo
-        #ifdef DEBUG
-            printf("EMERGENZA %d_%s TIMEOUT, rimasta in attesa per troppo tempo\n", current->emrg->id, current->emrg->type->emergency_desc);
-            fflush(stdout);
-        #endif
+        //Messaggio di rimozione emergenza
+        printf("EMERGENZA %d_%s TIMEOUT, rimasta in attesa in lista per troppo tempo\n", current->emrg->id, current->emrg->type->emergency_desc);
+        fflush(stdout);
+        
 
         nodo_t *da_cancellare = current; //Nodo ausigliario che punta al nodo da eliminare
         current = current->prev;
