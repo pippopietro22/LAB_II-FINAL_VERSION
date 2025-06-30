@@ -5,16 +5,17 @@
 #include "../Utils/Macro.h"
 #include "../Utils/Strutture.h"
 
-//Funzione incaricata di interpretare il file rescuer.conf per restituire un puntatore ad array di "rescuer_type_t" contenente 
-//tutti i tipi di soccorritore presenti nel file
+//Funzione che processa il file rescuers.conf e ritorna un puntatore ad array rescuer_type_t.
 rescuer_type_t *parserRescuers(){
-    rescuer_type_t *rescuerType;    //Array con tutti i tipi di soccorritori
+    //Puntatore che la funzione ritorna come risultato, dimensione settabile da Strutture.h
+    rescuer_type_t *rescuerType;
     MALLOC(rescuerType, (rescuer_type_t*)malloc(RESCUER_TYPES*sizeof(rescuer_type_t)), "Errore durante malloc da pareser_rescue.c.\n");
 
+    //Variabile che viene settata con la funzione "tempo_corrente()": indica il tempo da scrivere nel logFile.txt durante la documentazioni
     char time_now[BUFF];
     tempo_corrente(time_now);
 
-    //Si aprono i file Log e Conf e si documenta l'azione immediatamente
+    //Si aprono i file Log e Conf e si documentano le azioni nel logFile.txt
     FILE *fin, *flog;
     FILEOPEN(flog,fopen("logFile.txt","a"),"Errore durante apertura File Log da parser_rescuers.c\n");
     FPRINT(fprintf(flog,"[%s] [PARSER-RESCUERS] [FILE_PARSING] <Apertura file LOG>\n",time_now),flog, \
@@ -24,35 +25,38 @@ rescuer_type_t *parserRescuers(){
     FPRINT(fprintf(flog,"[%s] [PARSER-RESCUERS] [FILE_PARSING] <Apertura file rescuer.conf>\n",time_now),flog, \
                         "Errore durante scrittura fileLog da parser_rescuers.c\n");
 
-    int i = 0, match;   //i conterrà il numero di righe lette => numero di tipi soccorritore
-                        //match è il valore di ritorno di sscanf, numero corrispondenze 
+    int i = 0, match;   //i conterrà il numero di soccorritori man mano che si legge il file
+                        //match è il valore di ritorno di sscanf
     char *ret;          //ret è il valore di ritorno di fgets()
     char line[BUFF];    //line conterrà la linea letta
 
-    //Lettura linea
+    //Lettura riga file con FGETS
     FGETS(ret, fgets(line,BUFF-1,fin), fin, "Errore durante fgets da parser_rescuers.c\n");
+    //Documentazione su logFile.txt
     FPRINT(fprintf(flog,"[%s] [PARSER-RESCUERS] [FILE_PARSING] <Lettura file conf>\n",time_now),flog, \
                         "Errore durante scrittura fileLog da parser_rescuers.c\n");
-
+    
+    //Si continua l'analisi del file per mezzo di un ciclo while
     while(ret){
         //Alloco spazio per nome tipo soccorritore
         MALLOC(rescuerType[i].rescuer_type_name,(char*)malloc(BUFF*sizeof(char)), "Errore durante malloc da pareser_rescue.c.\n");
         
-        //Parsing linea
+        //Parsing linea: nelle relative variabili (alcune già di struttura) salvo le informazioni
         SSCANF(match, 5, sscanf(line,"[%99[^]]] [%d] [%d] [%d;%d]",rescuerType[i].rescuer_type_name, &rescuerType[i].quantity, \
                         &rescuerType[i].speed, &rescuerType[i].x, &rescuerType[i].y), \
                         "Formattazione errata file rescuers.conf\n");
 
+        //Documentazione su logFile.txt
         FPRINT(fprintf(flog,"[%s] [PARSER-RESCUERS] [FILE_PARSING] parsing file rescuer.conf: %s",time_now,line),flog, \
                         "Errore durante scrittura fileLog da parser_rescuers.c\n");
 
-        //Si incrementa il contatore "i" che funge anche da indice nell'array
+        //Alla fine dell'iterazione, si incrementa il contatore "i" che funge anche da indice nell'array
         i++;
 
         //Ricomincia il ciclo
         //Lettura linea
         FGETS(ret, fgets(line,BUFF-1,fin), fin, "Errore durante fgets da parser_rescuers.c\n");
-
+        //Documentazione su logFile.txt
         FPRINT(fprintf(flog,"[%s] [PARSER-RESCUERS] [FILE_PARSING] <Lettura file conf>\n",time_now),flog, \
                         "Errore durante scrittura fileLog da parser_rescuers.c\n");
     }
@@ -75,46 +79,51 @@ void delete_resType(rescuer_type_t *target){
     free(target);
 }
 
-//Funzione dedita alla creazione di un puntatore a puntarore di gemelli digitali:
-//il primo puntatore indica un array, ciascuno relativo ad un tipo di soccorritore;
-//i puntatori interni indicano un array di gemelli digitali relativi al tipo di soccorritore
-rescuer_digital_twin_t **rescuerTwin(rescuer_type_t *type){
+//Funzione dedita alla creazione di gemelli digitali
+rescuer_digital_twin_t **rescuerTwin(rescuer_type_t *resType){
+    //Ritorna un puntatore a puntatori di tipo rescuer_digital_twin_t
+    //la matrice è suddivisa in righe: ciascuna rappresentante un tipo di soccorso (nello stesso ordine in cui sono salvati i tipi di soccorsi)
+    //Ogni riga ha un numero di soccorsi specificato nel file conf
     rescuer_digital_twin_t **resPoint;
     MALLOC(resPoint, (rescuer_digital_twin_t**)malloc(RESCUER_TYPES*sizeof(rescuer_digital_twin_t*)), "Errore durante malloc da parser_rescuer.c.\n");
 
+    //Variabile che viene settata con la funzione "tempo_corrente()": indica il tempo da scrivere nel logFile.txt durante la documentazioni
     char time_now[BUFF];
     tempo_corrente(time_now);  
 
-    //File Log per documentare le azioni
+    //Si aprono i file Log e Conf e si documentano le azioni nel logFile.txt
     FILE *flog;
     FILEOPEN(flog,fopen("logFile.txt","a"),"Errore durante apertura File Log da parser_rescuers.c\n");
     FPRINT(fprintf(flog,"[%s] [PARSER-RESCUERS-TWINS] [FILE_PARSING] <Apertura file LOG>\n",time_now),flog, \
                         "Errore durate scrittura fileLog da parser_rescuers.c\n");
 
-    //Si fa un ciclo per allocare, ad ogni cella dell'array esterno, lo spazio per la giusta quantità di gemelli
+    //Si fa un ciclo per allocare sulla matrice, scorrendo le righe e allocando la quantità di gemelli per il dato tipo di soccorso
     for(int j = 0; j < RESCUER_TYPES; j++){
-        MALLOC(resPoint[j], (rescuer_digital_twin_t*)malloc(type[j].quantity*sizeof(rescuer_digital_twin_t)), "Errore durante malloc da parser_rescuer.c.\n");
+        MALLOC(resPoint[j], (rescuer_digital_twin_t*)malloc(resType[j].quantity*sizeof(rescuer_digital_twin_t)), "Errore durante malloc da parser_rescuer.c.\n");
 
         //nel ciclo interno si definiscono le proprietà di ogni gemello (in particolare l'"id")
-        for(int i = 0; i < type[j].quantity; i++){
-            resPoint[j][i].id = i+1;
-            resPoint[j][i].idType = j;
-            resPoint[j][i].x = type[j].x;
-            resPoint[j][i].y = type[j].y;
-            resPoint[j][i].rescuer = &type[j];
-            resPoint[j][i].status = IDLE;
+        for(int i = 0; i < resType[j].quantity; i++){
+            resPoint[j][i].id = i+1;        //Identificatore soccorritore>
+            resPoint[j][i].idType = j;        //Identificatore del tipo di soccorritore
+            resPoint[j][i].x = resType[j].x;    //Coordinate della base
+            resPoint[j][i].y = resType[j].y;
+            resPoint[j][i].rescuer = &resType[j];   //Puntatore struttura dati del tipo soccorritore
+            resPoint[j][i].status = IDLE;   //Label contenente lo status del soccorritore
         }
 
         //E, prima di passare al tipo di gemelli successivo, si documenta la creazione
         FPRINT(fprintf(flog,"[%s] [PARSER-RESCUERS-TWINS] [FILE_PARSING] <Sono stati creati %d gemelli digitali per %s>\n", \
-                        time_now, type[j].quantity,type[j].rescuer_type_name),flog,
+                        time_now, resType[j].quantity,resType[j].rescuer_type_name),flog,
                         "Errore durante scrittura fileLog da parser_rescuers.c\n");
     }
 
+    //Documentazione di fine creazione gemelli
     FPRINT(fprintf(flog,"[%s] [PARSER-RESCUERS-TWINS] [FILE_PARSING] <Creazione gemelli digitali completata>\n",time_now),flog, \
                         "Errore durate scrittura fileLog da parser_rescuers.c\n");
 
+    //Chiusura descrittore logFile.txt
     fclose(flog);
+    
     return resPoint;
 }
 

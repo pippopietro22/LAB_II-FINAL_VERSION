@@ -1,5 +1,5 @@
 #define DEBUG
-#undef DEBUG
+//#undef DEBUG
 
 //ERRORE GENERICO
 #define ERROR(e) (perror(e), exit(EXIT_FAILURE))

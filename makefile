@@ -8,34 +8,34 @@ LOGFILE = logFile.txt
 
 .PHONY: default clear run valgrind gdb
 
-default: debug client
+default: release client
 
 %.o: %.c %.h
 	$(CC) -c $(CFLAGS) $< -o $@ 
 
-debug: $(OBJS)
+release: $(OBJS)
 	$(CC) $(DEBUGFLAG) -o $@ $^ $(LIBS)
 
 client: $(OBJCLIENT)
 	$(CC) $(CFLAGS) -o $@ $^ $(LIBS)
 
-run: debug
+run: release
 	@if [ -f $(LOGFILE) ]; then \
 		rm $(LOGFILE); \
 	fi
-	./debug
+	./release
 
-valgrind: debug
+valgrind: release
 	@if [ -f $(LOGFILE) ]; then \
 		rm $(LOGFILE); \
 	fi
-	valgrind --leak-check=full ./debug
+	valgrind --leak-check=full ./release
 
-gdb: debug
+gdb: release
 	@if [ -f $(LOGFILE) ]; then \
 		rm $(LOGFILE); \
 	fi
-	gdb ./debug
+	gdb ./release
 
 clear: 
-	rm -f debug $(OBJS) $(OBJCLIENT) client logFile.txt
+	rm -f release $(OBJS) $(OBJCLIENT) client logFile.txt
