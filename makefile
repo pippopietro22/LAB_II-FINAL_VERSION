@@ -1,41 +1,42 @@
 CC = gcc
 CFLAGS = -O3 -Wall -pedantic -std=c11
 LIBS = -lpthread
-OBJS = main.o parser/parser_rescuers.o parser/parser_emergency_types.o parser/parser_env.o Utils/Funzioni.o Utils/Lista.o thrd_Functions/rescuer_on_scene.o \
+NAME = main
+OBJS = $(NAME).o parser/parser_rescuers.o parser/parser_emergency_types.o parser/parser_env.o Utils/Funzioni.o Utils/Lista.o thrd_Functions/rescuer_on_scene.o \
 		thrd_Functions/rescuers_return.o thrd_Functions/thrd_insert.o thrd_Functions/thrd_operatori.o
 OBJCLIENT = client.o
 LOGFILE = logFile.txt
 
 .PHONY: default clear run valgrind gdb
 
-default: release client
+default: $(NAME) client
 
 %.o: %.c %.h
 	$(CC) -c $(CFLAGS) $< -o $@ 
 
-release: $(OBJS)
-	$(CC) $(DEBUGFLAG) -o $@ $^ $(LIBS)
+$(NAME): $(OBJS)
+	$(CC) $(CFLAGS) -o $@ $^ $(LIBS)
 
 client: $(OBJCLIENT)
 	$(CC) $(CFLAGS) -o $@ $^ $(LIBS)
 
-run: release
+run: $(NAME)
 	@if [ -f $(LOGFILE) ]; then \
 		rm $(LOGFILE); \
 	fi
-	./release
+	./$(NAME)
 
-valgrind: release
+valgrind: $(NAME)
 	@if [ -f $(LOGFILE) ]; then \
 		rm $(LOGFILE); \
 	fi
-	valgrind --leak-check=full ./release
+	valgrind --leak-check=full ./$(NAME)
 
-gdb: release
+gdb: $(NAME)
 	@if [ -f $(LOGFILE) ]; then \
 		rm $(LOGFILE); \
 	fi
-	gdb ./release
+	gdb ./$(NAME)
 
 clear: 
-	rm -f release $(OBJS) $(OBJCLIENT) client logFile.txt
+	rm -f $(NAME) $(OBJS) $(OBJCLIENT) client logFile.txt

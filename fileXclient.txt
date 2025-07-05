@@ -6,4 +6,4 @@ Sparatoria 234 233 1
 Incendio 100 230 3
 Allagamento 12 234 2
 Cinghiali_in_Libertà 12 32 1
-Gattino_sull_Albero 323 2 1
+Gattino_sull_Albero 323 2 2

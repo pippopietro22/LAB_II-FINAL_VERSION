@@ -45,7 +45,7 @@ int thrd_operatori(void *data){
         //Utilizzo un accesso mtx alla coda per estrarre l'emergenza con maggior priorità e minor tempo rimanente
         mtx_lock(&lista_mtx);
             //Rimuovo emergenze con timeout (tempo essaurito per eccesso di attesa nella coda)
-            rimuovi_timeout(lista_emergenze, &log_mtx, args->flog);
+            rimuovi_timeout(lista_emergenze, &log_mtx, args->flog, args->tipiSoccorritori);
 
             //Mi metto in attesa su lista_cnd in caso non ci siano emergenze disponibili (e keep_running sempre uguale a 1)
             while(lista_emergenze->dim_lista == 0 && atomic_load(&keep_running)){
@@ -82,10 +82,8 @@ int thrd_operatori(void *data){
         //Se il tempo rimanente non è sufficiente per far arrivare i soccorsi, l'emergenza viene scartata
         if(t_rimanente < t_attesa){
             //Messaggio di DEBUG
-            #ifdef DEBUG
-                printf("EMERGENZA %d_%s TIMEOUT: Impossibile raggiungere il luogo dell'emergenza in tempo.\n",current.id, current.type->emergency_desc);
-                fflush(stdout);
-            #endif
+            printf("EMERGENZA %d_%s TIMEOUT: Impossibile raggiungere il luogo dell'emergenza in tempo.\n",current.id, current.type->emergency_desc);
+            fflush(stdout);
 
             //Si documenta l'impossibilità di far arrivare i soccorsi intempo
             mtx_lock(&log_mtx);
@@ -102,7 +100,11 @@ int thrd_operatori(void *data){
         }
 
         //Messaggio Presa in carico
-        printf("THRD %d EMERGENZA %d_%s PRESA IN CARICO\n", args->id, current.id, current.type->emergency_desc);
+        #ifdef DEBUG
+            printf("THRD %d ",args->id);
+            fflush(stdout);
+        #endif
+        printf("EMERGENZA %d_%s PRESA IN CARICO\n", current.id, current.type->emergency_desc);
         fflush(stdout);
 
         //Documento presa in carico dell'emergenza
@@ -196,6 +198,7 @@ int thrd_operatori(void *data){
                     soccorritori_liberi[i] += res_count;
                 mtx_unlock(&rescuer_mtx);
 
+                //Sveglio tutti i thrd in attesa di risorse
                 cnd_broadcast(&rescuer_cnd);
 
                 //Si dealloca lo spazio utilizzato dall'array di gemelli digitali

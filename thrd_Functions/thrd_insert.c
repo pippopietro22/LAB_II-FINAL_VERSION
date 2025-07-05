@@ -32,10 +32,8 @@ int thrd_insert(void *data){
 
     //Se ritorna NULL (non c'è una struttura emergency_request_t da deallocare), dealloco lo spazio per gli argomenti ed esco
     if(!analised){
-        #ifdef DEBUG
-            printf("Emergenza scartata, formato errato.\n");
-            fflush(stdout);
-        #endif
+        printf("Emergenza scartata, formato errato.\n");
+        fflush(stdout);
         
         free(args);
 
@@ -52,10 +50,9 @@ int thrd_insert(void *data){
 
     //Se ritorna NULL (non bisogna deallocare una struttura emergency_t), dealloco lo spazio per gli argomenti ed esco
     if(!valid){ 
-        #ifdef DEBUG
-            printf("Emergenza scartata, dati errati.\n");
-            fflush(stdout);
-        #endif
+        printf("Emergenza scartata, dati errati.\n");
+        fflush(stdout);
+        
         
         free(args);
 
@@ -89,9 +86,11 @@ int thrd_insert(void *data){
 
         //Messaggio di DEBUG
         #ifdef DEBUG
-            printf("THRD INSERT: EMERGENZA %d_%s inserita.\n",current.id, current.type->emergency_desc);
+            printf("THRD INSERT: ");
             fflush(stdout);
         #endif
+        printf("EMERGENZA %d_%s inserita.\n",current.id, current.type->emergency_desc);
+            fflush(stdout);
 
         //Scrittura su logFile.txt per mezzo di una mutex
         mtx_lock(&log_mtx);

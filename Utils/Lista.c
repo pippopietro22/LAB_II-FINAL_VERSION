@@ -103,7 +103,7 @@ void add_emrg(lista_t *list, emergency_t *emrg) {
 
 
 //Funzione che rimuove node (emergenze) che sono arrivati in timeout: hanno aspettato troppo nella lista e il tempo è scaduto
-void rimuovi_timeout(lista_t *list, mtx_t *log_mtx, FILE*flog){
+void rimuovi_timeout(lista_t *list, mtx_t *log_mtx, FILE*flog, rescuer_type_t* tipiSoccorritore){
     if(list == NULL || list->dim_lista == 0) return;    //Nessun elemento nella lista
     
     nodo_t *current = list->tail;   //Nodo ausigliario per scorrere la lista
@@ -149,6 +149,8 @@ void rimuovi_timeout(lista_t *list, mtx_t *log_mtx, FILE*flog){
             list->tail = current;
         }
     }
+
+    controllo_situazione(tipiSoccorritore);
 }
 
 

@@ -1,8 +1,6 @@
 #include<threads.h>
 
 // STRUTTURE SOCCORRITORI
-#define RESCUER_TYPES 6
-
 typedef enum{
     IDLE,
     EN_ROUTE_TO_SCENE, 
@@ -29,9 +27,6 @@ typedef struct{
 
 
 // STRUTTURE EMERGENZE
-#define EMERGENCY_TYPES 10
-#define EMERGENCY_NAME_LENGTH 64
-
 typedef enum{
     WAITING,
     ASSIGNED,
@@ -98,8 +93,6 @@ typedef struct{
 
 
 //STRUTTURA DATI PER THREADS
-#define THRD_OPERATIVI 5
-
 typedef struct{
     char emrg[BUFF];    //Messaggio proveniente dalla message_queue
     FILE *flog;             //Per far scrivere ai thread sul file log solo dopo aver accesso a logFile_mtx
@@ -132,18 +125,19 @@ typedef struct{
 
 
 // PROTOTIPI FUNZIONI PARSER
+    //PARSER RESCUER
+    rescuer_type_t *parserRescuers();
+    void delete_resType(rescuer_type_t *target);
+    rescuer_digital_twin_t **rescuerTwin(rescuer_type_t *type);
+    void destroy_resTwin(rescuer_digital_twin_t **twin);
 
-rescuer_type_t *parserRescuers();
-void delete_resType(rescuer_type_t *target);
-rescuer_digital_twin_t **rescuerTwin(rescuer_type_t *type);
-void destroy_resTwin(rescuer_digital_twin_t **twin);
+    //PARSER EMERGENCY_TYPES
+    emergency_type_t *parserEmergencies(rescuer_type_t *resType);
+    void destroy_emrgType(emergency_type_t *target);
 
-
-emergency_type_t *parserEmergencies(rescuer_type_t *resType);
-void destroy_emrgType(emergency_type_t *target);
-
-environment_t *parserEnv();
-void destroy_env(environment_t *target);
+    //PARSER_ENVIRONMENT
+    environment_t *parserEnv();
+    void destroy_env(environment_t *target);
 
 
 
@@ -158,7 +152,7 @@ void destroy_emrg_validata(emergency_t *val);
 lista_t *lista_init();
 void destroy_list(lista_t *list);
 void add_emrg(lista_t *list, emergency_t *emrg);
-void rimuovi_timeout(lista_t *list, mtx_t *log_mtx, FILE*flog);
+void rimuovi_timeout(lista_t *list, mtx_t *log_mtx, FILE*flog, rescuer_type_t* tipiSoccorritore);
 emergency_t *estrai_nodo(lista_t *list);
 void stampa_lista(lista_t *list);
 
