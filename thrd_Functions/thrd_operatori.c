@@ -154,8 +154,9 @@ int thrd_operatori(void *data){
                     //Documento sul file LOG
                     mtx_lock(&log_mtx);
                         tempo_corrente(time_now);
-                        FPRINT(fprintf(args->flog,"[%s] [%s_%d] [RESCUER_STATUS] <Soccorritore procede verso l'emergenza>\n",time_now, \
-                                        current.rescuers_dt[i][idx_res]->rescuer->rescuer_type_name, current.rescuers_dt[i][idx_res]->id),args->flog, \
+                        FPRINT(fprintf(args->flog,"[%s] [%s_%d] [RESCUER_STATUS] <Soccorritore procede verso %d_%s>\n",time_now, \
+                                        current.rescuers_dt[i][idx_res]->rescuer->rescuer_type_name, current.rescuers_dt[i][idx_res]->id, \
+                                        current.id, current.type->emergency_desc),args->flog, \
                                         "Errore durante scrittura file LOG da thrd_operatori().\n");
                     mtx_unlock(&log_mtx);
 

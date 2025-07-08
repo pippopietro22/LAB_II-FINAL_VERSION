@@ -32,11 +32,5 @@ valgrind: $(NAME)
 	fi
 	valgrind --leak-check=full ./$(NAME)
 
-gdb: $(NAME)
-	@if [ -f $(LOGFILE) ]; then \
-		rm $(LOGFILE); \
-	fi
-	gdb ./$(NAME)
-
 clear: 
 	rm -f $(NAME) $(OBJS) $(OBJCLIENT) client logFile.txt

@@ -2,10 +2,10 @@
 #undef DEBUG
 
 //Macro che regolano il comportamento del programma
-#define THRD_OPERATIVI 5
-#define RESCUER_TYPES 6
-#define EMERGENCY_TYPES 10
-#define EMERGENCY_NAME_LENGTH 100
+#define THRD_OPERATIVI 5    //Numero di THREAD che gestiscono emergenze
+#define RESCUER_TYPES 6     //Numero di tipi soccorritori
+#define EMERGENCY_TYPES 10  //Numero di Tipi emergenze
+#define EMERGENCY_NAME_LENGTH 100 
 
 
 //ERRORE GENERICO
