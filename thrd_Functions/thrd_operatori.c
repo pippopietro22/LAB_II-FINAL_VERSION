@@ -95,6 +95,9 @@ int thrd_operatori(void *data){
             //Indico che l'emergenza gestita viene terminata
             atomic_fetch_sub(&emrg_gestite,1);
 
+            //controllo la situazione
+            controllo_situazione(args->tipiSoccorritori);
+
             //Si procede con la prossima iterazione
             continue;
         }

@@ -157,6 +157,15 @@ int main(){
     //In caso di thrd in attesa su lista_emergenza, gli sveglio per farli terminare
     cnd_broadcast(&lista_cnd);
 
+
+
+    //CHIUDO sistemi di comunicazione con il client (MESSAGE_QUEUE e SHARED_MEMORY)
+    SCALL(ret,mq_close(mq),"Errore durante chiusura della coda.\n");
+    SCALL(ret,shm_unlink(SHM_NAME),"Errore durante shm_unlink.\n");
+
+
+    
+
     //Aspetto la terminazione di tutti i thrd operativi con una join
     int res;
     for(int i= 0; i < THRD_OPERATIVI; i++){
@@ -175,11 +184,6 @@ int main(){
 
     //Dealloco tutta la memoria usata per la lista: eventuali nodi con emergenze rimaste e la lista stessa.
     destroy_list(lista_emergenze);
-
-
-    //CHIUDO sistemi di comunicazione con il client (MESSAGE_QUEUE e SHARED_MEMORY)
-    SCALL(ret,mq_close(mq),"Errore durante chiusura della coda.\n");
-    SCALL(ret,shm_unlink(SHM_NAME),"Errore durante shm_unlink.\n");
     
     
     //DISTRUGGO MUTEX E CND

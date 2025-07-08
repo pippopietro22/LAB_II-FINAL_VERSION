@@ -7,7 +7,7 @@
 
 //Funzione che processa il file rescuers.conf e ritorna un puntatore ad array rescuer_type_t.
 rescuer_type_t *parserRescuers(){
-    //Puntatore che la funzione ritorna come risultato, dimensione settabile da Strutture.h
+    //Puntatore che la funzione ritorna come risultato, dimensione settabile da Macro.h
     rescuer_type_t *rescuerType;
     MALLOC(rescuerType, (rescuer_type_t*)malloc(RESCUER_TYPES*sizeof(rescuer_type_t)), "Errore durante malloc da pareser_rescue.c.\n");
 

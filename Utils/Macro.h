@@ -7,6 +7,7 @@
 #define EMERGENCY_TYPES 10
 #define EMERGENCY_NAME_LENGTH 100
 
+
 //ERRORE GENERICO
 #define ERROR(e) (perror(e), exit(EXIT_FAILURE))
 

@@ -7,7 +7,7 @@
 
 //Funzione che processa il file emergency_type.conf e ritorna un puntatore ad array emergency_type_t.
 emergency_type_t *parserEmergencies(rescuer_type_t *resType){
-    //Puntatore che la funzione ritorna come risultato, dimensione settabile da Strutture.h
+    //Puntatore che la funzione ritorna come risultato, dimensione settabile da Macro.h
     emergency_type_t *emergencyType;
     MALLOC(emergencyType,(emergency_type_t*)malloc(EMERGENCY_TYPES*sizeof(emergency_type_t)), "Errore durante malloc da parser_emergency_types.c.\n");
 
@@ -51,7 +51,7 @@ emergency_type_t *parserEmergencies(rescuer_type_t *resType){
         //Adesso si alloca memoria per la proprietà "rescuers" che rappresenta un array di soccorsi richiesti, ciascuno con 
         //le relative informazioni (quantità richiesta etc.).
         //Questo processo si esegue per mezzo di Tokenizzazione, dato che la quantità di soccorsi richiesti non è fissata, ma conosciamo
-        //la dimensione dell'array: RESCUER_TYPES (macro definita in Strutture.h)
+        //la dimensione dell'array: RESCUER_TYPES (macro definita in Macro.h)
         int socc = 0;   //Numero di tipi soccorsi richiesti
 
         MALLOC(emergencyType[i].rescuers, (rescuer_request_t*)malloc(RESCUER_TYPES*sizeof(rescuer_request_t)), "Errore durante malloc da parser_emergency_types.c\n");
