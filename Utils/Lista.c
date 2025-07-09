@@ -135,17 +135,23 @@ void rimuovi_timeout(lista_t *list, mtx_t *log_mtx, FILE*flog, rescuer_type_t* t
         current = current->prev;
         
         if(da_cancellare->prev == NULL){
+            //Se il nodo è in testa, la lista da scorrere è finita
             if(da_cancellare->next == NULL){
+                //Se non vi sono altri elementi, si svuota la lista
                 list->head = list->tail = NULL;
             }else{
+                //Si modifica la testa
                 list->head = da_cancellare->next;
                 list->head->prev = NULL;
             }
         }else{
+            //Altrimenti si controlla se è in coda o in mezzo
             if(da_cancellare->next == NULL){
+                //Se è in coda, si modifica la coda
                 list->tail = da_cancellare->prev;
                 list->tail->next = NULL;
             }else{
+                //Si rimuove il nodo in mezzo
                 da_cancellare->prev->next = da_cancellare->next;
                 da_cancellare->next->prev = da_cancellare->prev;
             }

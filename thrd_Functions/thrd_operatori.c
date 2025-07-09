@@ -200,10 +200,10 @@ int thrd_operatori(void *data){
 
                     //Si segna sui contatori il numero di risorse restituite
                     soccorritori_liberi[i] += res_count;
-                mtx_unlock(&rescuer_mtx);
 
-                //Sveglio tutti i thrd in attesa di risorse
-                cnd_broadcast(&rescuer_cnd);
+                    //Sveglio tutti i thrd in attesa di risorse
+                    cnd_broadcast(&rescuer_cnd);
+                mtx_unlock(&rescuer_mtx);
 
                 //Si dealloca lo spazio utilizzato dall'array di gemelli digitali
                 free(current.rescuers_dt[i]);

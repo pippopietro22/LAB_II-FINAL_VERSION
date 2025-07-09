@@ -79,10 +79,10 @@ int thrd_insert(void *data){
         //Dopo l'eventuale attesa, si inserisce l'emergenza validata nella lista delle emergenze
         mtx_lock(&lista_mtx);
             add_emrg(lista_emergenze, valid);
-        mtx_unlock(&lista_mtx);
 
-        //Si svegliano tutti i thrd in attesa di emergenze
-        cnd_broadcast(&lista_cnd);
+            //Si svegliano tutti i thrd in attesa di emergenze
+            cnd_broadcast(&lista_cnd);
+        mtx_unlock(&lista_mtx);
 
         //Messaggio di DEBUG
         #ifdef DEBUG

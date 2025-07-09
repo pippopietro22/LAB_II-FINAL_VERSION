@@ -75,6 +75,9 @@ int rescuers_return(void *data){
             printf("\n");
             fflush(stdout);
         #endif
+
+        //Sveglio tutti i thrd in attesa di risorse
+        cnd_broadcast(&rescuer_cnd);
     mtx_unlock(&rescuer_mtx);
 
     //Messaggio di DEBUG
@@ -82,9 +85,6 @@ int rescuers_return(void *data){
         printf("thrd con in carico un'emergenza: %d\n",atomic_load(&emrg_gestite));
         fflush(stdout);
     #endif
-
-    //Sveglio tutti i thrd in attesa di risorse
-    cnd_broadcast(&rescuer_cnd);
 
     //Controllo se non ci sono più emergenze da svolgerer e che tutti i soccorritori siano di nuovo liberi.
     //In questo caso stampo un messaggio a schermo

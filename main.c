@@ -156,9 +156,9 @@ int main(){
     atomic_store(&keep_running,0);
 
     //In caso di thrd in attesa su lista_emergenza, gli sveglio per farli terminare
-    cnd_broadcast(&lista_cnd);
-
-
+    mtx_lock(&lista_mtx);
+        cnd_broadcast(&lista_cnd);
+    mtx_unlock(&lista_mtx);
 
     //CHIUDO sistemi di comunicazione con il client (MESSAGE_QUEUE e SHARED_MEMORY)
     SCALL(ret,mq_close(mq),"Errore durante chiusura della coda.\n");
