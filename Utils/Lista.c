@@ -156,7 +156,7 @@ void rimuovi_timeout(lista_t *list, mtx_t *log_mtx, FILE*flog, rescuer_type_t* t
 
 //Funzione che estra l'emergenza a più alta priorita (la coda)
 emergency_t *estrai_nodo(lista_t *list){
-    if(list->dim_lista == 0) return NULL;   //Se non ci sono nodi non esegue nulla
+    if(list == NULL || list->tail == NULL || list->dim_lista == 0) return NULL;   //Se non ci sono nodi non esegue nulla
 
     emergency_t *emrg = list->tail->emrg;   //puntatore ad emergenza
 

@@ -7,7 +7,7 @@ OBJS = $(NAME).o parser/parser_rescuers.o parser/parser_emergency_types.o parser
 OBJCLIENT = client.o
 LOGFILE = logFile.txt
 
-.PHONY: default clear run valgrind gdb
+.PHONY: default clear run valgrind
 
 default: $(NAME) client
 
