@@ -133,21 +133,29 @@ void rimuovi_timeout(lista_t *list, mtx_t *log_mtx, FILE*flog, rescuer_type_t* t
 
         nodo_t *da_cancellare = current; //Nodo ausigliario che punta al nodo da eliminare
         current = current->prev;
+        
+        if(da_cancellare->prev == NULL){
+            if(da_cancellare->next == NULL){
+                list->head = list->tail = NULL;
+            }else{
+                list->head = da_cancellare->next;
+                list->head->prev = NULL;
+            }
+        }else{
+            if(da_cancellare->next == NULL){
+                list->tail = da_cancellare->prev;
+                list->tail->next = NULL;
+            }else{
+                da_cancellare->prev->next = da_cancellare->next;
+                da_cancellare->next->prev = da_cancellare->prev;
+            }
+        }
 
         //Deallocazione memoria nodo da_cancellare
         destroy_emrg_validata(da_cancellare->emrg); //Prima l'emergenza
         free(da_cancellare);        //Poi il nodo stesso
         //Si decrementa il numero di nodi presenti
         list->dim_lista--;
-
-        //Se non ci sono più nodi nella lista si settano testa e coda a NULL
-        if (current == NULL) {
-            list->head = list->tail = NULL;
-        } else {
-            //Se ci sono altri nodi, si setta current come nuova coda
-            current->next = NULL;
-            list->tail = current;
-        }
     }
 
     controllo_situazione(tipiSoccorritore);
