@@ -162,6 +162,7 @@ int main(){
 
     //CHIUDO sistemi di comunicazione con il client (MESSAGE_QUEUE e SHARED_MEMORY)
     SCALL(ret,mq_close(mq),"Errore durante chiusura della coda.\n");
+    SCALL(ret,mq_unlink(ambiente->queue_name),"Errore durante mq_unlink da main.c");
     SCALL(ret,shm_unlink(SHM_NAME),"Errore durante shm_unlink.\n");
 
 
