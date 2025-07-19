@@ -45,7 +45,9 @@ int thrd_operatori(void *data){
         //Utilizzo un accesso mtx alla coda per estrarre l'emergenza con maggior priorità e minor tempo rimanente
         mtx_lock(&lista_mtx);
             //Rimuovo emergenze con timeout (tempo essaurito per eccesso di attesa nella coda)
-            rimuovi_timeout(lista_emergenze, &log_mtx, args->flog, args->tipiSoccorritori);
+            mtx_lock(&rescuer_mtx);
+                rimuovi_timeout(lista_emergenze, &log_mtx, args->flog, args->tipiSoccorritori);
+            mtx_unlock(&rescuer_mtx);
 
             //Mi metto in attesa su lista_cnd in caso non ci siano emergenze disponibili (e keep_running sempre uguale a 1)
             while(lista_emergenze->dim_lista == 0 && atomic_load(&keep_running)){
@@ -95,8 +97,11 @@ int thrd_operatori(void *data){
             //Indico che l'emergenza gestita viene terminata
             atomic_fetch_sub(&emrg_gestite,1);
 
-            //controllo la situazione
-            controllo_situazione(args->tipiSoccorritori);
+            mtx_lock(&lista_mtx);
+            mtx_lock(&rescuer_mtx);
+                controllo_situazione(args->tipiSoccorritori);
+            mtx_unlock(&rescuer_mtx);
+            mtx_unlock(&lista_mtx);
 
             //Si procede con la prossima iterazione
             continue;
@@ -223,7 +228,11 @@ int thrd_operatori(void *data){
             //Questo thrd rilascia la sua emergenza e lo segnala
             atomic_fetch_sub(&emrg_gestite,1);
 
-            controllo_situazione(args->tipiSoccorritori);
+            mtx_lock(&lista_mtx);
+            mtx_lock(&rescuer_mtx);
+                controllo_situazione(args->tipiSoccorritori);
+            mtx_unlock(&rescuer_mtx);
+            mtx_unlock(&lista_mtx);
 
             continue;
         }

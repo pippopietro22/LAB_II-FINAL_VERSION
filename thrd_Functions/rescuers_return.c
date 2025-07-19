@@ -12,6 +12,7 @@
 extern int soccorritori_liberi[RESCUER_TYPES]; //Variabili accedibile da qualsiasi thread per controllare risorse disponibili (tramite mutex)
 
 extern mtx_t rescuer_mtx;  //variabili mtx per risorse
+extern mtx_t lista_mtx;
 extern mtx_t log_mtx;      //mtx per accesso a file LOG
 extern cnd_t rescuer_cnd;  //cnd per attesa ripristino risorse
 
@@ -86,9 +87,11 @@ int rescuers_return(void *data){
         fflush(stdout);
     #endif
 
-    //Controllo se non ci sono più emergenze da svolgerer e che tutti i soccorritori siano di nuovo liberi.
-    //In questo caso stampo un messaggio a schermo
-    controllo_situazione(args->tipiSoccorritori);
+    mtx_lock(&lista_mtx);
+    mtx_lock(&rescuer_mtx);
+        controllo_situazione(args->tipiSoccorritori);
+    mtx_unlock(&rescuer_mtx);
+    mtx_unlock(&lista_mtx);    
 
     //Dealloco lo spazio per gli argomenti del thrd
     free(args);
